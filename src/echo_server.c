@@ -3,62 +3,53 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <sys/socket.h>
-
-#define BUF_SIZE 1024
-
-void error_handling(char *message);
-
-int main(int argc, char *argv[]){
-	int serv_sock, clnt_sock;
-	char message[BUF_SIZE];
-	int str_len, i;
-	
-	struct sockaddr_in serv_adr, cln_adr;
-	
-	if(argc!=2){
-		printf("Usage : %s <port>\n", argv[0]);
-
-		exit(1);
+#include <sys/ socket .h>
+#define BUF_ SIZE 1024
+void error_ handling( char *message);
+int main(int argc, char *argv[])
+{
+	int serv_ sock, clnt_ sock;
+	char message[BUF_ _SIZE] ;
+	int str_ len, i;
+	struct sockaddr_ in serv_ adr, clnt_ adr;
+	socklen_ t clnt_ _adr_ _Sz;
+	if(argc!=2) {
+	printf("Usage : %s <port>\n", argv[0]);
+	exit(1);
 	}
+	serv_ sock=socket(PF_ _INET, SOCK_ STREAM, 0);
+	if(serv_ sock==-1)
+	error_ handling(" socket() error");
 
-	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
-	if(serv_sock == -1) error_handling("socket() error");
-
-	memset(&serv_adr, 0, sizeof(serv_adr));
-	serv_adr.sin_family = AF_INET;
-	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serv_adr.sin_port = htons(atoi(argv[1]));
-
-	if(bind(serv_sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1) 
-		error_handling("bind() error");
+	memset(&serv_ adr, 0, sizeof(serv_ adr));
+	serv_ adr. sin_ family=AF_ INET;
+	serv_ _adr. sin_ _addr.s_ addr=hton1(INADDR_ ANY);
+	serv_ adr. sin_ port=htons (atoi(argv[1]));
+	if(bind(serv_ sock, (struct sockaddr* )&serv_ adr, sizeof(serv_ adr))=-1)
+	error_ handling("bind() error");
+	if(listen(serv_ sock, 5)==-1)
+	error_ handling("listen() error");
+	clnt_ _adr_ sz=sizeof(clnt_ adr);
 	
-	if(listen(serv_sock, 5) == -1) error_handling("listen() error");
 	
-	clnt_adr_size = sizeof(clnt_adr);
-
-	for(int i = 0; i < 5; i++)
+	for(i=0; i<5; 1++)
 	{
-		clnt_sock = accpet(serv_sock, (struct sockaddr*)&clnt_adr, &clnt_adr_sz);
-		if(clnt_sock == -1) error_handling("accept() error");
-		else printf("Connected client %d \n", i+1);
-
-		while(str_len = read(clnt_sock, message, BUF_SIZE)) != 0) 
-			write(clnt_sock, message, str_len);
-
-		close(clnt_sock);
-	
+	clnt_ sock=accept(serv_ sock, (struct sockaddr*)&c1nt_ adr, &clnt_ adr. _sZ);
+	if(clnt_ sock==-1)
+	error_ handling("accept() error");
+	else
+	printf("Connected client %d \n", i+1);
+	while((str_ len=read(c1nt_ sock, message, BUF_ _SIZE))!=0)
+	write(c1nt_ sock, message, str. _len);
+	close(c1nt_ sock) ;
 	}
-	
-	close(serv_sock);
-
+	close(serv_ sock);
 	return 0;
 }
-
-void error_handling(char *message)
+	
+void error_ handling(char *message)
 {
-	fputs(message, stderr);
-	fputc("\n", stderr);
-	exit(1);
-
+fputs (message, stderr);
+fputc('\n', stderr);
+exit(1);
 }
