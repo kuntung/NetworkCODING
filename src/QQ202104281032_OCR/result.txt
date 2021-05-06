@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/ socket .h>
+#define BUF_ SIZE 1024
+void error_ handling( char *message);
+int main(int argc, char *argv[])
+int serv_ sock, clnt_ sock;
+char message[BUF_ _SIZE] ;
+int str_ len, i;
+struct sockaddr_ in serv_ adr, clnt_ adr;
+socklen_ t clnt_ _adr_ _Sz;
+if(argc!=2) {
+printf("Usage : %s <port>\n", argv[0]);
+exit(1);
+}
+serv_ sock=socket(PF_ _INET, SOCK_ STREAM, 0);
+if(serv_ sock==-1)
+error_ handling(" socket() error");
