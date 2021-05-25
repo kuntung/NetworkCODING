@@ -1359,7 +1359,8 @@ struct timeval
 {
     long tv_sec; //seconds
     long tv_usec; //microseconds
-}
+}     
+```
 
 **文件描述符的变化：**
 
@@ -1367,9 +1368,9 @@ struct timeval
 >
 > ![image-20210511162731101](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511162731101.png)
 
-**select函数代码示例**
+//select函数代码示例
 
-​```c++
+```c++
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -1414,7 +1415,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	return 0;
-}               
+}          
 ```
 
 ## 基于I/O复用的回声服务端
@@ -2011,6 +2012,1485 @@ void error_handling(char* message)
 
    > 多播数据在路由器进行复制。因此，即使主机数量很多，如果各主机存在的相同路径，也可以通过一次数据传输到多台主机上。但TCP无论路径如何，都要根据主机数量进行数据传输。
 
+# 套接字和标准I/O
+
+## 使用标准I/O函数的两个优点
+
+1. 标准I/O函数具有良好的移植性
+
+2. 标准I/O函数可以利用缓冲提高性能
+
+   ![](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514143436490.png)
+
+   ![image-20210514143523025](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514143523025.png)
+
+   **设置缓冲的用途：**
+
+   1. 设置缓冲的主要目的是为了提高性能（针对标准I/O函数缓冲而言）
+
+      > 标准I/O函数为了提高性能，内部提供额外的缓冲。因此，若不调用`fflush`函数则无法保证立即将数据传输到客户端
+      >
+      > ```c
+      > while(!feof(readfp))
+      > {
+      >     fgets(message, BUF_SIZE, readfp);
+      >     fputs(message, writefp);
+      >     fflush(writefp);
+      > }
+      > ```
+
+   2. 套接字的缓冲主要是为了TCP协议而设立的，为的是能够实现再次重传。因此，在套接字的输出缓冲中保存了已经发送的数据
+
+   ![image-20210514144239146](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514144239146.png)
+
+### 标准I/O函数的几个缺点
+
+![image-20210514150222169](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514150222169.png)
+
+### 使用标准I/O函数
+
+对于创建套接字时返回的文件描述符`fd`，需要通过`fdopen()`函数将其转换为`FILE结构体指针`才能使用标准I/O函数
+
+```c
+#include <stdio.h>
+
+FILE* fdopen(int fildes, const char* mode); //成功时返回转换的FILE结构体指针，失败时返回NULL
+//fildes: 需要转换的文件描述符
+//mode：将要创建的FILE结构体指针的模式信息
+// 1. "r"读模式
+// 2. "w"写模式
+
+//fdopen代码示例
+#include <stdio.h>
+#include <fcntl.h>
+
+int main(void)
+{
+    FILE *fp;
+    int fd = open("data.dat", O_WRONLY | O_CREAT | O_TRUNC); //创建文件描述符
+    if(fd == -1)
+    {
+        fputs("file open error", stdout);
+        return -1;
+    }
+  	fp = fdopen(fd, "w"); //将文件描述符fd通过fdopen转换为FILE*,并且打开模式为w
+    fputs("Network C progamming \n", fp); //通过标准I/O的fputs写入字符串"Network C programming"
+    	
+    fclose(fp);
+    
+    return 0;
+}
+```
+
+**利用fileno函数转换为文件描述符**
+
+```c
+#include <stdio.h>
+
+int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败时返回-1
+```
+
+![image-20210514152054691](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514152054691.png)
+
+## 基于套接字的标准I/O函数使用
+
+在第四章的基础上，将文件描述符通过`fdopen`函数转为`FILE*`并使用标准I/O函数
+
+**1. echo_server.c的两种实现方式**
+
+![image-20210514154355009](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154355009.png)
+
+![image-20210514154529742](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154529742.png)
+
+> 标准I/O函数为了提高性能，内部提供额外的缓冲。因此，若不调用`fflush`函数则无法保证立即将数据传输到客户端
+
+**2. echo_client.c的两种实现方式**
+
+![image-20210514154826316](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154826316.png)
+
+## 问题探讨
+
+1. 标准I/O函数的两个优点？为什么具有这两个优点
+
+   - 基于ANSIX标准具有良好的一致性
+   - 可以利用缓冲提高性能
+
+2. 标准IO中，“调用fputs函数传输数据时，调用后应立即开始发送！”，为何这种想法是错误的？为了达到这种效果应添加哪些处理过程？
+
+   > 通过标准输出函数的传输的数据不直接通过套接字的输出缓冲区发送，而是保存在标准输出函数的缓冲中，然后再用`fflush`函数进行输出。因此，即使调用`fputs`函数，也不能立即发送数据。如果想保障数据传输的时效性，必须经过`fflush`函数的调用过程
+
+# 关于I/O流分离的其他内容
+
+## 分离I/O
+
+**流：**指数据流动，但通常可以比喻为“以数据收发为目的的一种桥梁“
+
+**分离I/O的两种方法：**
+
+1. 通过创建多个进程，分割数据收发流程。另一个好处：可以提高频繁交换数据的程序性能
+
+   <img src="C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210509111933649.png" alt="image-20210509111933649" style="zoom:50%;" />
+
+   **目的：**
+
+   - 通过分开输入过程和输出过程降低实现难度
+   - 与输入无关的输出操作可以提高速度
+
+2. 通过对`fdopen`函数的调用，创建读模式和写模式的FILE指针，即分离了输入工具和输出工具
+
+   **目的：**
+
+   - 为了将FILE指针按照读模式和写模式加以区分
+   - 可以通过区分读写模式降低实现难度
+   - **通过区分I/O缓冲提高缓冲性能**
+
+> **流分离带来的EOF问题：** 参考第七章：优雅地断开套接字连接中提到的`半关闭:shutdown(sock, SHUT_WR)`
+>
+> 但是对于`FILE指针`的输出模式
+
+![image-20210515143613504](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515143613504.png)
+
+![image-20210515143802506](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515143802506.png)
+
+> 在上述代码中，当服务器端关闭输出缓冲writefp的时候，这时候，`套接字创建的tcp连接已经关闭。而不是半关闭`
+>
+> 因此，本章需要实现**文件描述符的复制和半关闭**，`即针对fdopen函数调用时生成的FILE指针进行半关闭操作`
+
+## 文件描述符的复制和半关闭
+
+![image-20210515144139289](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515144139289.png)
+
+![image-20210515144329891](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515144329891.png)
+
+### 复制文件描述符
+
+这里的文件描述符的复制与fork函数中进行的复制有所区别，调用fork函数时将复制整个进程。因此同一进程内不能同时有原件和副本
+
+```c
+#include <inistd.h>
+
+int dup(int fildes);
+int dup2(int fildes, int fildes2); //成功时返回复制的文件描述符，失败时返回-1
+/*
+fildes: 需要复制的文件描述符
+fildes2: 明确指定的文件描述符整数值，即指定复制出的文件描述符的数值。要求大于0且小于进程能生成的最大文件描述符值
+*/
+
+//代码示例
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char* argv[])
+{
+	int cfd1, cfd2;
+	char str1[] = "Hi~ \n";
+	char str2[] = "It's a nice day~ \n";
+
+	cfd1 = dup(1);
+	cfd2 = dup2(cfd1, 7);
+
+	printf("fd1 = %d, fd2 = %d \n", cfd1, cfd2);
+	write(cfd1, str1, sizeof(str1)); 
+	write(cfd2, str2, sizeof(str2));
+
+	close(cfd1);
+	close(cfd2);
+
+	write(1, str1, sizeof(str1));
+	close(1);
+	write(1, str2, sizeof(str2));
+	
+	return 0;
+}
+```
+
+![image-20210515155515624](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515155515624.png)
+
+### 复制文件描述符后”流“的分离
+
+> 之前，在将`fdopen()`建立的读写FILE指针关闭其一之后，这时候便会发送`EOF`使得另一个指针无法正常工作。因为文件描述符只有一个，被关闭之后建立的套接字也随之关闭。
+>
+> 因此需要通过`dup`或者`dup2`函数将文件描述符进行复制
+>
+> **进而实现文件描述符或FILE*的半关闭**
+
+**sep_serv2.c代码示例：**
+
+![image-20210515160307992](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515160307992.png)
+
+## 问题探讨
+
+1. **下列关于 FILE 结构体指针和文件描述符的说法错误的是**？
+
+   答：以下加粗内容代表说法正确。
+
+   1. 与 FILE 结构体指针相同，文件描述符也分输入描述符和输出描述符
+   2. 复制文件描述符时将生成相同值的描述符，可以通过这 2 个描述符进行 I/O
+   3. **可以利用创建套接字时返回的文件描述符进行 I/O ，也可以不通过文件描述符，直接通过 FILE 结构体指针完成**
+   4. **可以从文件描述符生成 FILE 结构体指针，而且可以利用这种 FILE 结构体指针进行套接字 I/O**
+   5. 若文件描述符为读模式，则基于该描述符生成的 FILE 结构体指针同样是读模式；若文件描述符为写模式，则基于该描述符生成的 FILE 结构体指针同样是写模式
+
+2. **EOF 的发送相关描述中错误的是**？
+
+   答：以下加粗内容代表说法正确。
+
+   1. 终止文件描述符时发送 EOF
+   2. **即使未完成终止文件描述符，关闭输出流时也会发送 EOF**
+   3. 如果复制文件描述符，则包括复制的文件描述符在内，所有文件描述符都终止时才会发送 EOF
+   4. **即使复制文件描述符，也可以通过调用 shutdown 函数进入半关闭状态并发送 EOF**
+
+# 优于select的epoll
+
+> 实现I/O复用的传统方法有`select函数`和`poll函数`，但是各种原因导致这些方法无法得到令人满意的性能。因此有了`linux下的epoll，BSD的kqueue，Solaris的/dev/poll和windows下的IOCP等复用技术`
+>
+> **select方式并不适合以`web服务器端开发`为主流的现代开发环境，所以要学习linux平台下的epoll**
+
+## 基于select的I/O复用技术速度慢的原因
+
+### select的缺点
+
+- 调用select函数后常见的针对所有文件描述符的循环语句
+- 每次调用select函数时都需要向该函数传递监视对象信息
+
+![image-20210515165318880](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165318880.png)
+
+![image-20210515165322722](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165322722.png)
+
+> 只看代码的话，循环体是对提高性能的大障碍，而**更大的障碍是每次传递监视对象的信息**
+>
+> 应用程序向操作系统传递数据时，将对程序造成很大的负担。而且无法通过代码优化解决。因此将造成性能上的致命弱点
+>
+> ![image-20210515165636867](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165636867.png)
+
+### select函数的优点
+
+> epoll方式只在linux下提供支持，即改进的I/O复用模式不具有兼容性。而大多数操作系统都支持select函数。
+
+## 实现epoll时必要的函数和结构体
+
+能够克服select函数缺点的epoll函数具有如下优点（与select函数的缺点相反）
+
+1. 无需编写以监视状态变化为目的的针对所有文件描述符的`循环语句`
+2. 调用对应于epoll函数的`epoll_wait函数时无需每次传递监视对象信息`
+
+**epoll服务器端实现中需要的三个函数**
+
+1. `epoll_create`:创建保存epoll文件描述符的空间
+2. `epoll_ctl`:向空间注册并销毁文件描述符
+3. `epoll_wait`:与select函数类型，等待文件描述符发生变化
+
+### select VS epoll
+
+1. select方式中为了保存监视对象文件描述符，直接通过`fd_set`变量来设置文件描述符.而`epoll方式下由操作系统负责保存监视对象文件描述符`。因此需要通过`epoll_create`函数向操作系统请求创建`保存文件描述符的空间`
+
+2. **为了添加和删除监视对象文件描述符**
+
+   - select通过`FD_SET,FD_CLR`函数
+   - 在epoll中，通过epoll_ctl函数请求操作系统完成
+
+3. select通过`select`函数等待文件描述符的变化，而epoll中调用`epoll_wait`函数
+
+4. select通过`FD_ISSET`查看fd_set变量查看监视对象的状态变化。而epoll方式中通过`epoll_event`将发生变化的文件描述符单独集中在一起
+
+   ```c
+   struct epoll_event
+   {
+       __uint32_t events;
+       epoll_data_t data;
+   }
+   
+   typedef union epoll_data
+   {
+       void* ptr;
+       int fd;
+       __uint32_t u32;
+       __uint64_t u64;
+   } epoll_data_t;
+   //声明足够大的epoll_event结构体数组后，传递给epoll_wait函数时，发生变化的文件描述符信息将被填入该数组。因此无需像select函数那样针对所有文件描述符进行循环
+
+### epoll_create
+
+> 注：需要linux内核2.6以上
+>
+> `uname -srm`查看内核版本
+>
+> `cat /proc/sys/kernel/osrelease`
+
+```c
+#include <sys/epoll.h>
+
+int epoll_create(int size); //成功时返回epoll文件描述符，失败时返回-1
+// size：epoll实例的大小，决定epoll例程的大小，但是该值只是向操作系统提的建议。
+// 因此，size并非用来决定epoll例程的大小，仅供操作系统参考
+// 实际上，linux2.6.8之后的内核将完全忽略传入的size参数，并根据情况调整epoll实例的大小
+```
+
+**通过epoll_create函数创建的`文件描述符保存空间`称为"epoll例程"**
+
+![image-20210515172000483](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515172000483.png)
+
+### epoll_ctl
+
+生成epoll例程后，应通过`epoll_ctl函数`在其内部注册监视对象文件描述符
+
+```c
+#include <sys/epoll.h>
+
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); //成功时返回0，失败时返回-1
+/*
+epfd:用于注册监视对象的epoll例程的文件描述符
+op:用于指定监视对象的添加、删除或更改等操作
+  - EPOLL_CTL_ADD:将文件描述符注册到epoll例程
+  - EPOLL_CTL_DEL:从epoll例程中删除文件描述符
+  - EPOLL_CTL_MOD:更改注册的文件描述符的关注事件发生情况
+fd:需要注册的监视对象文件描述符
+event:监视对象的事件类型,从监视对象中删除文件描述符时，不需要监视类型（事件信息）
+*/
+
+//函数调用
+epoll_ctl(A, EPOLL_CTL_ADD, B, C); //向epoll例程A中注册文件描述符B，主要目的是监视参数C中的事件
+epoll_ctl(A, EPOLL_CTL_DEL, B, NULL); //从epoll例程A中删除文件描述符B
+```
+
+![image-20210516131909171](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210516131909171.png)
+
+```c
+//epoll_event
+struct epoll_event
+{
+    __uint32_t events;
+    epoll_data_t data;
+}
+typedef union epoll_data
+{
+    void* ptr;
+    int fd;
+    __uint32_t u32;
+    __uint64_t u64;
+} epoll_data_t;
+
+//代码示例：
+struct epoll_event event;
+event.events = EPOLLIN; //发生需要读取数据的情况时
+event.data.fd = sockfd; 
+epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &event);
+```
+
+> **epoll_event的成员events可以保存的常量及所指的事件类型**
+>
+> 1. EPOLLIN:需要读取数据的情况
+> 2. EPOLLOUT:输出缓冲为空，可以立即发送数据的情况
+> 3. EPOLLPRI:收到OOB数据的情况（OOB紧急信息)
+> 4. EPOLLRDHUP:断开连接或半关闭的情况，这在边缘触发方式下非常有用
+> 5. EPOLLERR:发生错误的情况
+> 6. EPOLLET:以边缘触发的方式得到事件通知
+> 7. EPOLLONESHOT:发生一次事件后，相应文件描述符不再收到事件通知，因此需要向epoll_ctl函数的第二个参数传递EPOLL_CTL_MOD,再次设置事件
+> 可以通过位或运算同时传递多个参数
+
+### epoll_wait
+
+与select机制中select函数对应的`epoll_wait`函数，epoll相关函数中默认最后调用该函数
+
+```c
+#include <sys/epoll.h>
+
+int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout); //成功时返回发生事件的文件描述符数，失败时返回-1
+/*
+epfd:表示事件发生监视范围的epoll例程的文件描述符
+events:保存发生事件的文件描述符集合的结构体地址值
+maxevents:第二个参数中可以保存的最大事件数
+timeout:以1/1000秒为单位的等待时间，传递-1时，一直等待直到发生事件
+*/
+
+//调用格式
+int event_cnt;
+struct epoll_event* ep_events;
+
+ep_events = malloc(sizeof(struct epoll_event)*EPOLL_SIZE); //宏常量EPOLL_SIZE
+//申请EPOLL_SIZE个epoll_event的内存空间
+event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1);
+//调用函数后，返回发生事件的文件描述符数，同时在第二参数指向的缓冲中保存发生事件的文件描述符集合。因此，无需像select那样插入针对所有文件描述符的循环
+```
+
+## 基于epoll的回声服务器端
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+
+#define BUF_SIZE 100
+#define EPOLL_SIZE 50
+
+void error_handling(char* message);
+
+int main(int argc, char* argv[])
+{
+	int serv_sock, clnt_sock;
+	struct sockaddr_in serv_adr, clnt_adr;
+	socklen_t adr_sz;
+	int str_len, i;
+ 	char buf[BUF_SIZE];
+
+	struct epoll_event* ep_events; //创建一个ep_event数组
+	struct epoll_event event;
+	
+	int epfd, event_cnt; //epfd是通过epoll_create创建的epoll例程
+
+	if(argc!=2)
+	{
+
+		printf("Usage: %s <port> \n", argv[0]);
+		exit(1);
+	}
+	//创建sock套接字
+	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+	memset(&serv_adr, 0, sizeof(serv_adr));
+	serv_adr.sin_family = AF_INET;
+	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serv_adr.sin_port = htons(atoi(argv[1]));
+
+	if(bind(serv_sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1)
+		error_handling("Bind() error");
+	if(listen(serv_sock, 5) == -1) 
+		error_handling("listen() error");
+	//创建epoll例程
+	epfd = epoll_create(EPOLL_SIZE);
+	ep_events = malloc(sizeof(struct epoll_event)*EPOLL_SIZE); //分配内存
+	
+	event.events = EPOLLIN; //用来保存服务器发生变化的文件描述符
+	event.data.fd = serv_sock;
+	epoll_ctl(epfd, EPOLL_CTL_ADD, serv_sock, &event); //epoll例程epfd中注册文件描述符serv_sock，主要目的是监视参数event的事件EPOLLIN
+
+	while(1)
+	{
+		event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1); 
+        //成功时返回发生事件的文件描述符数，失败时返回-1
+        //通过ep_events保存发生事件的文件描述符集合
+		if(event_cnt == -1)
+		{
+			puts("epoll_wait() error");
+			break;
+		}
+		for(i = 0; i < event_cnt; i++)
+		{
+			if(ep_events[i].data.fd == serv_sock) //检测到新的连接请求
+			{
+				adr_sz = sizeof(clnt_adr);
+				clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_adr, &adr_sz);
+				event.events = EPOLLIN;
+				event.data.fd = clnt_sock;
+				epoll_ctl(epfd, EPOLL_CTL_ADD, clnt_sock, &event);
+				printf("connected client: %d \n", clnt_sock);
+			}
+			else //已经连接的其他client有数据需要发送，则read并echo
+			{
+				str_len = read(ep_events[i].data.fd, buf, BUF_SIZE);
+				if(str_len == 0) //收到连接断开的情形,EPOLLRDHUP
+				{
+					epoll_ctl(epfd, EPOLL_CTL_DEL, ep_events[i].data.fd, NULL);
+					close(ep_events[i].data.fd);
+					printf("closed client: %d \n", ep_events[i].data.fd);
+				}
+				else
+				{
+					write(ep_events[i].data.fd, buf, str_len); //echo!
+				}
+			}
+		}
+	}	
+	close(serv_sock);
+	close(epfd);
+	return 0;
+}
+
+void error_handling(char* message)
+{
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
+```
+
+## 条件触发(Level Trigger)和边缘触发(Edge Trigger)
+
+**两者区别在于发生事件的时间点**
+
+1. 条件触发方式中，只要输入缓冲有数据就会一直通知该事件
+2. 边缘触发方式：在输入缓冲收到数据时仅注册1次该事件，即使输入缓冲中还留有数据，也不会再进行注册
+
+**epoll默认以条件触发方式工作**
+
+## 实现边缘触发的回声服务器端
+
+![image-20210517105058578](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210517105058578.png)
+
+
+
+> **select模式是条件触发还是边缘触发：**
+>
+> select模式是以**条件触发**的方式工作的，输入缓冲中如果还剩有数据，肯定会注册事件
+
+### 边缘触发的服务器端实现中必知的两点
+
+1. **通过`errno`变量验证错误原因**
+
+   > linux声明了全局变量`int errno`，为了访问该变量，需要引入`error.h`头文件。每种套接字相关函数发生错误时，保存到errno变量中的值都不同。
+   >
+   > 1. read函数发现缓冲中没有数据可读时返回-1，同时在errno中保存`EAGAIN`常量
+
+2. **为了完成非阻塞I/O，更改套接字特性**
+
+   > linux提供更改或读取文件属性的方法`fcntl`
+   >
+   > ```c++
+   > #include <fcntl.h>
+   > 
+   > int fcntl(int filedes, int cmd, ...); //成功时返回cmd参数相关值，失败时返回-1
+   > 
+   > /*
+   > filedes：属性更改目标的文件描述符
+   > cmd：表明函数调用的目的
+   > 	1. F_GETFL:可以获得第一个参数所指的文件描述符类型（int）
+   > 	2. F_SETFL:可以更改文件描述符属性
+   > */
+   > 
+   > int flag = fcntl(fd, F_GETFL, 0); //获取之前设置的属性信息
+   > fcntl(fd, F_SETFL, flag|O_NONBLOCK); //将文件（套接字）更改为非阻塞模式
+   > ```
+
+> 边缘触发的服务器端实现与`读取错误原因`和`非阻塞模式的套接字创建`有着密切联系。
+>
+> 1. 首先需要通过`errno`确认错误原因。因为在边缘触发方式中，接受数据时仅注册1次该事件。因此，需要验证输入缓冲是否为空。`read函数返回-1且变量errno中的值为EAGAIN时，说明没有数据可读`
+> 2. 在边缘触发方式下，阻塞方式工作的read和write函数有可能引起服务器端的长时间停顿。因此，边缘触发方式中一定要采用非阻塞的read和write函数
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#define BUF_SIZE 4 //为了验证边缘触发的工作方式，将缓冲设置为4个字节
+#define EPOLL_SIZE 50
+
+void setnonblockingmode(int fd);
+void error_handling(char* message);
+
+int main(int argc, char* argv[])
+{
+	int serv_sock, clnt_sock;
+	struct sockaddr_in serv_adr, clnt_adr;
+	socklen_t adr_sz;
+	int str_len, i;
+ 	char buf[BUF_SIZE];
+
+	struct epoll_event* ep_events;
+	struct epoll_event event;
+	
+	int epfd, event_cnt; //epfd是通过epoll_create创建的epoll例程
+
+	if(argc!=2)
+	{
+
+		printf("Usage: %s <port> \n", argv[0]);
+		exit(1);
+	}
+	
+	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+	memset(&serv_adr, 0, sizeof(serv_adr));
+	serv_adr.sin_family = AF_INET;
+	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serv_adr.sin_port = htons(atoi(argv[1]));
+
+	if(bind(serv_sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1)
+		error_handling("Bind() error");
+	if(listen(serv_sock, 5) == -1) 
+		error_handling("listen() error");
+
+	epfd = epoll_create(EPOLL_SIZE);
+	ep_events = malloc(sizeof(struct epoll_event)*EPOLL_SIZE);
+	
+	event.events = EPOLLIN; //设置边缘触发
+	event.data.fd = serv_sock;
+	epoll_ctl(epfd, EPOLL_CTL_ADD, serv_sock, &event);
+
+	while(1)
+	{
+		event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1); //通过epoll_wait等待判断文件描述符的事件变化
+		if(event_cnt == -1)
+		{
+			puts("epoll_wait() error");
+			break;
+		}
+		
+		puts("return epoll_wait");
+		for(i = 0; i < event_cnt; i++)
+		{
+			if(ep_events[i].data.fd == serv_sock) //检测到新的连接请求
+			{
+				adr_sz = sizeof(clnt_adr);
+				clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_adr, &adr_sz);
+				setnonblockingmode(clnt_sock); //设置套接字的非阻塞模式
+				event.events = EPOLLIN| EPOLLET;//设置边缘触发
+				event.data.fd = clnt_sock;
+				epoll_ctl(epfd, EPOLL_CTL_ADD, clnt_sock, &event);
+				printf("connected client: %d \n", clnt_sock);
+			}
+			else
+			{	while(1)
+				{//反复读取数据
+				str_len = read(ep_events[i].data.fd, buf, BUF_SIZE);
+				if(str_len == 0)
+				{
+					epoll_ctl(epfd, EPOLL_CTL_DEL, ep_events[i].data.fd, NULL);
+					close(ep_events[i].data.fd);
+					printf("closed client: %d \n", ep_events[i].data.fd);
+				}
+				else if(str_len < 0)
+				{
+
+					if(errno == EAGAIN) break; //当前输入缓冲无数据
+				}
+				else
+				{
+					write(ep_events[i].data.fd, buf, str_len); //echo!
+				}
+				}
+			}
+		}
+	}	
+	close(serv_sock);
+	close(epfd);
+	return 0;
+}
+void setnonblockingmode(int fd)
+{
+	int flag = fcntl(fd, F_GETFL, 0);
+	fcntl(fd, F_SETFL, flag|O_NONBLOCK);
+}
+void error_handling(char* message)
+{
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
+```
+
+## 问题探讨
+
+1. 边缘触发vs条件触发
+
+   > 边缘触发的优点：**可以分离接收数据和处理数据的时间点**
+   >
+   > 条件触发也能够区分数据接收和处理，但在输入缓冲收到数据的情况下，如果不读取（延迟处理），则每次调用`epoll_wait`函数时都会产生响应的时间，而且事件数也会累加
+
+2. 利用select函数实现服务器端时，代码层面存在的两个缺点是？
+
+   - 调用select函数后常见的针对所有文件描述符的循环语句
+   - 每次调用select函数时都需要向该函数传递监视对象信息
+
+   **优点：** epoll方式只在linux下提供支持，即改进的I/O复用模式不具有兼容性。而大多数操作系统都支持select函数。
+
+3. 无论是select方式还是epoll方式，都需要将监视对象文件描述符信息通过函数调用传递给操作系统。请解释传递该信息的原因
+
+   ![image-20210515165636867](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165636867.png)
+
+   > 即select函数与文件描述符有关，是监视套接字变化的函数。而`套接字是由操作系统管理的`。所以select函数绝对需要借助于操作系统才能完成功能
+
+4. select方式和epoll方式的最大差异在于监视对象文件描述符传递给操作系统的方式。请说明具体的差异，并解释为何存在这种差异。
+
+   > epoll不同于select的地方是`只要将监视对象文件描述符的信息传递一个给操作系统就可以了`。因此epoll方式克服了select方式的缺点，体现在linux内核上保存监视对象信息的方式。
+
+5. 虽然epoll是select的改进方案，但是select也有自己的优点。在何种情况下使用select方式更合理？
+
+   > 如果连接服务器的人数不多（不需要高性能），而且需要在多种操作系统（windows和linux）下进行操作，在兼容性方面，使用select会比epoll更合理
+
+6. epoll以条件触发或边缘触发方式工作，二者有何区别？从输入缓冲的角度说明这两种方式通知事件的时间点差异
+
+   > 1. 条件触发方式中，只要输入缓冲有数据就会一直通知该事件
+   > 2. 边缘触发方式：在输入缓冲收到数据时仅注册1次该事件，即使输入缓冲中还留有数据，也不会再进行注册
+
+7. 采用边缘触发时可以分离数据的接收和处理时间点，说明其原因和优点
+
+   > 如果使用边缘触发方式，`在输入缓冲中接收数据时，只会发生一次事件通知`，而且输入缓冲中仍有数据时，不会进行通知，因此`可以在数据被接收后，在想要的时间内处理数据`。而且，如果分离数据的接收和处理时间点，在服务器中会有更大的灵活性
+
+# 多线程服务器端的实现
+
+**多进程模型存在的问题：**创建进程（复制）的工作本身会给操作系统带来相当沉重的负担。每个进程具有独立的内存空间，因此进程间通信难度也比较高。
+
+- 创建进程的过程会带来一定的开销
+
+- 为了完成进程间数据交换，需要特殊的IPC技术（管道通信）
+
+- **每秒少则数十次，多则数千次的“上下文切换”是创建进程时最大的开销**
+
+  > **上下文切换：**为了进程能够实现分时使用CPU。运行程序前需要将相应进程信息读入内存，如果运行进程A后紧接着运行进程B，就应该将进程A相关信息移出内存。并读入进程B相关信息。
+  >
+  > 但此时进程A的数据将被移动到硬盘，所以`上下文切换需要很长时间`
+
+![image-20210518094051329](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094051329.png)
+
+## 线程和进程的差异
+
+![image-20210518094426676](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094426676.png)
+
+![image-20210518094637012](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094637012.png)
+
+![image-20210518094753488](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094753488.png)
+
+## 线程创建及运行
+
+Portable Operating System Interface for Computer Environment（**POSIX**）是为了提高UNIX系列操作系统间的移植性而制定的API规范。
+
+### 线程的创建和执行流程
+
+线程具有单独的执行流，因此需要单独定义线程的main函数，还需要请求操作系统在单独的执行流中执行该函数。
+
+```c
+#include <pthread.h>
+
+int pthread_create(pthread_t* restrict thread, const pthread_attr_t* restrict attr, void*(*start_routine)(void*), void* restrict arg); //成功时返回0，失败时返回其他值
+/*
+thread:保存新创建线程ID的变量地址值，线程与进程相同，也需要用于区分不同线程的ID
+attr:用于传递线程属性的参数，传递NULL时，创建默认属性的线程
+start_routing:相当于线程main函数的，在单独执行流中执行的函数地址值（函数指针）
+arg:通过第三个参数传递调用函数时包含传递参数信息的变量地址值
+*/
+```
+
+**对于pthread_create函数，关键在于熟练掌握restrict关键字和函数指针相关语法**
+
+**thread1.c代码示例**
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+
+void* thread_main(void* arg);
+
+int main(int argc, char* argv[])
+{
+	pthread_t t_id;
+	int thread_param = 5;
+	
+	if(pthread_create(&t_id, NULL, thread_main, (void*)&thread_param)!=0)
+	{
+		//失败时返回其他值，成功时返回0
+		puts("pthread_create() error");
+		return -1;
+	}
+	
+	sleep(10); //调用sleep函数使main函数停顿10s，为了延迟进程的终止时间。因为main函数在return以后，会终止进程，同时终止内部创建的进程。
+	puts("end of main");
+	
+	return 0;
+}
+
+void* thread_main(void* arg) //传入参数为pthread_create函数的第四个参数
+{
+	int i;
+	int cnt = *((int*)arg);
+	for(i = 0; i < cnt; i++)
+	{
+		sleep(1); puts("running thread");
+	}
+	return NULL;
+}
+```
+
+![image-20210518101005612](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101005612.png)
+
+![image-20210518101451105](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101451105.png)
+
+![image-20210518101558166](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101558166.png)
+
+### 通过`pthread_join`函数控制线程的执行流
+
+```c
+#include <pthread.h>
+
+int pthread_join(pthread_t thread, void** status); //成功时返回0，失败时返回其他值
+/*
+thread:该参数值ID的线程终止时才会从该函数返回
+status:保存线程的main函数返回值的指针变量地址值
+*/
+```
+
+> 调用该函数的进程（或线程）将进入等待状态，直到第一个参数ID对应的线程终止为止，而且可以得到线程的main函数返回值。所以该函数比较有用
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
+
+void* thread_main(void* arg);
+
+int main(int argc, char* argv[])
+{
+	pthread_t t_id;
+	int thread_param = 5;
+	
+	void* thr_ret; //thread的main函数返回值
+	
+	if(pthread_create(&t_id, NULL, thread_main, (void*)&thread_param)!= 0)
+	{
+		puts("pthread_create() error");
+		return -1;
+	}
+	
+	if(pthread_join(t_id, &thr_ret) != 0)  //main函数将等待ID保存在t_id变量中的线程终止
+	{
+		puts("pthread_join() error");
+		return -1;
+
+	}
+	
+	printf("Thread return message: %s \n", (char*)thr_ret);
+
+	free(thr_ret);
+	return 0;
+}
+
+void* thread_main(void* arg)
+{
+	int i;
+	int cnt = *((int*)arg);
+	char* msg = (char*)malloc(sizeof(char)*50);
+	
+	strcpy(msg, "hello, I am a thread!\n");
+	
+	for(i = 0; i < cnt; ++i)
+	{
+		sleep(1); puts("running thread");
+	}
+	
+	return (void*)msg; //返回线程内部动态分配的内存空间的地址值。
+    //容易内存泄露哈
+}
+
+int pthread_join(pthread_t thread, void** status); //成功时返回0，失败时返回其他值
+/*
+thread:该参数值ID的线程终止时才会从该函数返回
+status:保存线程的main函数返回值的指针变量地址值
+
+线程返回值的获取方法：
+1. 因为线程的主函数是void* thread_main(void* arg);因此通过
+void* thr_ret来接受返回值,并将thr_ret传入pthread_join函数的第二个参数
+if(pthread_join(t_id, &thr_ret) != 0); //第二个参数为void**
+*/
+```
+
+![image-20210518104312060](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518104312060.png)
+
+### 可在临界区内调用的函数
+
+关于线程的运行需要考虑：多个线程同时调用函数时（执行时），这类函数内部存在临界区。即多个线程同时执行这部分代码时，可能引起问题，临界区中至少存在一条这类代码
+
+**根据临界区是否引起问题，函数可分为**
+
+1. 线程安全函数（Thread-safe function）
+
+   > 被多个线程同时调用时也不会引发问题，线程安全函数中同样可能存在临界区，只是在线程安全函数中，同时被多个线程调用时可通过一些措施避免问题
+
+2. 非~
+
+![image-20210518105750153](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518105750153.png)
+
+### 工作线程模型
+
+![image-20210518143635351](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518143635351.png)
+
+**thread3.c代码示例**
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+
+void* thread_summation(void* arg);
+
+int sum = 0; //全局变量区
+
+int main(int argc, char* argv[])
+{
+	pthread_t id_t1, id_t2;
+	int range1[] = {1, 5};
+	int range2[] = {6, 10};
+
+	pthread_create(&id_t1, NULL, thread_summation, (void*)range1);
+	pthread_create(&id_t2, NULL, thread_summation, (void*)range2);
+
+	pthread_join(id_t1, NULL);
+	pthread_join(id_t2, NULL);
+
+	printf("result: %d\n", sum);
+
+	return 0;
+}
+
+void* thread_summation(void* arg)
+{
+	int start = ((int*)arg)[0];
+	int end = ((int*)arg)[1];
+
+	while(start <= end)
+	{ 
+		sum+=start; //线程共享全局变量的数据区
+		start++;
+	}
+	
+	return NULL;
+}
+```
+
+**具有更高发生临界区错误可能性的样例**
+
+
+
+![image-20210518145001987](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518145001987.png)
+
+![image-20210518145050607](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518145050607.png)
+
+## 线程存在的问题和临界区
+
+### 多个线程访问同一变量
+
+**多线程编程中`同步`的重要性**
+
+![image-20210518151004518](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518151004518.png)
+
+### 临界区位置
+
+**临界区定义：**函数内同时运行多个线程时引起问题的多条语句构成的代码块
+
+全局变量num不是临界区，因为它不是引起问题的语句，只是代表内存区域的声明而已。
+
+临界区通常位于线程运行的函数内部
+
+```c
+void* thread_inc(void* arg)
+{
+    int i;
+    for(i = 0; i < 50000000; i++) 
+        num += 1; //临界区
+    
+    return NULL;
+}
+
+void* thread_dec(void* arg)
+{
+    int i;
+    for(i = 0; i < 50000000; i++) 
+        num -= 1; //临界区
+    
+    return NULL;
+}
+```
+
+![image-20210518151450205](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518151450205.png)
+
+## 线程同步
+
+> 用来解决线程访问顺序引发的问题
+>
+> - 同时访问同一块内存空间时发生的情况（临界区）
+> - 需要指定访问同一内存空间的线程执行顺序的情况（**控制线程执行顺序**）
+
+### 互斥量（锁机制）
+
+互斥量是“Mutual Exclusion”的简写，表示不允许多个线程同时访问。主要用来解决`线程同步访问的问题`
+
+**互斥量的创建及销毁函数**
+
+```c
+#include <pthread.h>
+
+int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr); 
+int pthread_mutex_destroy(pthread_mutex_t* mutex); //成功时返回0，失败时返回其他值
+/*
+mutex: 创建互斥量时传递保存互斥量的变量地址值，销毁时传递需要销毁的互斥量地址值
+attr: 传递即将创建的互斥量属性，没有特别需要指定的属性时传递NULL
+*/
+
+pthread_mutex_t mutex; //声明pthread_mutex_t型互斥量
+//其地址值做为init和destroy的第一个参数
+
+pthread_mutex_init(&mutex, NULL); //等价于pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+//但推荐使用pthread_mutex_init进行初始化，因为通过宏进行初始化时很难发现发生的错误
+```
+
+**通过互斥量`锁住`或`释放`临界区时使用的函数**
+
+```c
+#include <pthread.h>
+
+int pthread_mutex_lock(pthread_mutex_t* mutex);
+int pthread_mutex_unlock(pthread_mutex_t* mutex); //成功时返回0，失败时返回其他值
+```
+
+![image-20210518154538315](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518154538315.png)
+
+### 信号量
+
+ **信号量创建及销毁方法**
+
+```c
+#include <semaphore.h>
+
+int sem_init(sem_t* sem, int pshared, unsigned int value);
+int sem_destroy(sem_t* sem); //成功时返回0，失败时返回其他值
+/*
+sem:创建信号量时传递保存信号量的变量地址值，销毁时传递需要销毁的信号量变量
+pshared:传递其他值时，创建可由多个进程共享的信号量。传递0时，创建只允许1个进程内部使用的信号量。
+value：指定新创建的信号量的初始值
+*/
+
+//相当于互斥量lock和unlock的函数
+int sem_post(sem_t* sem);
+int sem_wait(sem_t* sem); //成功时返回0，失败时返回其他值
+//sem：传递保存信号量读取值的变量地址值，传递给sem_post时信号量*sem加1，传递给sem_wait时信号量减1
+```
+
+![image-20210518163853244](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518163853244.png) 
+
+![image-20210518164035944](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518164035944.png)
+
+**代码实现：**
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+void* read(void* arg);
+void* accu(void* arg);
+
+static sem_t sem_one; 
+static sem_t sem_two; //两个信号量
+static int num;
+int main(int argc, char* argv[])
+{
+	pthread_t id_t1, id_t2;
+	sem_init(&sem_one, 0, 0); //一个进程，初始值value=0
+	sem_init(&sem_two, 0, 1); //一个进程中，初始值value = 1
+	
+	pthread_create(&id_t1, NULL, read, NULL);
+	pthread_create(&id_t2, NULL, accu, NULL);
+	
+	pthread_join(id_t1, NULL);
+	pthread_join(id_t2, NULL);
+	
+	sem_destroy(&sem_one);
+	sem_destroy(&sem_two);
+
+	return 0;
+}
+
+void* read(void* arg)
+{
+	int i;
+	for(i = 0; i < 5; i++)
+	{
+		fputs("Input num: ", stdout);
+		sem_wait(&sem_two);//只有sem_two不为0的时候才能够执行scanf
+		scanf("%d", &num);
+		sem_post(&sem_one);
+	}
+	return NULL;
+}
+
+void* accu(void* arg)
+{
+	int sum = 0, i;
+	for(i = 0; i<5; i++)
+	{
+		sem_wait(&sem_one);
+		sum+=num;
+		sem_post(&sem_two); //这时候sem_two变为1
+	}
+	printf("Result: %d \n", sum);
+	
+	return NULL;
+}
+```
+
+**利用两个信号量sem_one和sem_two，并通过调用sem_wait和sem_post函数，实现0,1的翻转**
+
+![image-20210518165735418](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518165735418.png)
+
+## 线程的销毁和多线程并发服务器端的实现
+
+### 销毁线程的3种方法
+
+Linux线程并不是在首次调用的线程main函数返回时自动销毁，所以需要通过如下两种方法之一加以明确，否则由线程创建的内存空间将一直存在
+
+1. 调用pthread_join函数
+
+   >  调用该函数不仅会等待线程终止，还会引导线程销毁。
+   >
+   > **存在的问题：**调用该函数的线程将进入阻塞状态，因此通常通过`pthread_detach`函数引导线程销毁
+
+2. 调用pthread_detach函数
+
+   ```c
+   #include <pthread.h>
+   
+   int pthread_detach(pthread_t thread); //成功时返回0，失败时返回其他值
+   //thread：终止的同时需要销毁的线程ID
+   ```
+
+   > 调用该函数不会引起线程终止或进入阻塞状态，可以通过该函数引导销毁线程创建的内存空间。
+   >
+   > 调用该函数后不能再针对相应线程调用`pthread_join`函数
+
+### 多线程并发服务器端的实现
+
+**实现功能，涉及知识点：**
+
+1. 线程的使用方法
+   - 创建、同步、销毁
+2. 临界区的处理方式
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define BUF_SIZE 100
+#define MAX_CLNT 256 
+
+void* handle_clnt(void* arg);
+void send_msg(char* msg, int len);
+void error_handling(char* msg);
+
+int clnt_cnt = 0;
+int clnt_socks[MAX_CLNT]; //管理接入的客户端套接字的变量和数组，访问这两个变量的代码将构成临界区
+pthread_mutex_t mutx;
+
+int main(int argc, char* argv[])
+{
+	int serv_sock, clnt_sock;
+	struct sockaddr_in serv_adr, clnt_adr;
+	int clnt_adr_sz;
+	pthread_t t_id;
+
+	if(argc != 2)
+	{
+		printf("Usage : %s <port> \n", argv[0]);
+		exit(1);
+	}
+	
+	pthread_mutex_init(&mutx, NULL);
+	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+	
+	memset(&serv_adr, 0, sizeof(serv_adr));
+	serv_adr.sin_family = AF_INET; //IPv4地址
+	serv_adr.sin_port = htons(atoi(argv[1]));
+	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
+	if(bind(serv_sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1)
+		error_handling("bind() error");
+	if(listen(serv_sock, 5) == -1)
+		error_handling("listen() error");
+	
+	while(1)
+	{
+		clnt_adr_sz = sizeof(clnt_adr);
+		clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_adr, &clnt_adr_sz);
+
+		pthread_mutex_lock(&mutx);
+		clnt_socks[clnt_cnt++] = clnt_sock; //临界区，因为涉及到操作全局变量
+		pthread_mutex_unlock(&mutx);
+
+		pthread_create(&t_id, NULL, handle_clnt, (void*)&clnt_sock); //创建线程向新接入的客户端提供服务，并执行handle_clnt函数，并将clnt_sock作为参数传入
+		pthread_detach(t_id); //通过pthread_detach销毁线程
+		printf("Connected client IP: %s \n", inet_ntoa(clnt_adr.sin_addr)); //将网络序转为字节序？
+	}	
+	close(serv_sock);
+	return 0;
+}
+
+void* handle_clnt(void* arg)
+{
+	int clnt_sock = *((int*)arg);
+	int str_len = 0, i;
+	char msg[BUF_SIZE];
+
+	while((str_len = read(clnt_sock, msg, sizeof(msg)))!=0)
+		send_msg(msg, str_len);
+
+	pthread_mutex_lock(&mutx);
+	for(i = 0; i < clnt_cnt; i++) //remove disconnected client
+	{
+		if(clnt_sock == clnt_socks[i])
+		{
+			while(i++ < clnt_cnt-1)
+				clnt_socks[i] = clnt_socks[i+1];
+			break;
+		}
+	}
+	clnt_cnt--;
+	pthread_mutex_unlock(&mutx);
+	close(clnt_sock);
+	
+	return NULL; 
+}
+
+void send_msg(char* msg, int len) //send to all
+{
+	int i;
+	pthread_mutex_lock(&mutx);
+	for(i = 0; i < clnt_cnt; i++)
+	{
+		write(clnt_socks[i], msg, len);
+	}
+	pthread_mutex_unlock(&mutx);
+}
+
+void error_handling(char* message)
+{
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
+```
+
+![image-20210519112512147](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210519112512147.png)
+
+![image-20210519112646642](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210519112646642.png)
+
+### 多线程并发客户端实现
+
+**实现输入输出分离**
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <string.h>
+
+#define BUF_SIZE 100
+#define NAME_SIZE 20
+
+void* send_msg(void* arg);
+void* recv_msg(void* arg); //定义收发信息的函数，交由线程处理
+void error_handling(char* message);
+
+char name[NAME_SIZE] = "[DEFAULT";
+char msg[BUF_SIZE];
+
+int main(int argc, char* argv[])
+{
+	int sock;
+	struct sockaddr_in serv_addr;
+	pthread_t snd_thread, rcv_thread; //收发数据的线程
+	void* thread_return;
+
+	if(argc != 4)
+	{
+		printf("Usage: %s <IP> <port> <name> \n", argv[0]);
+		exit(1);
+	}
+	
+	sprintf(name, "[%s]", argv[3]); //将argv[3]以[%s]的形式输出到name保存
+	sock = socket(PF_INET, SOCK_STREAM, 0);
+
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
+	serv_addr.sin_port = htons(atoi(argv[2]));
+
+	if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
+		error_handling("connect() error");
+	
+	pthread_create(&snd_thread, NULL, send_msg, (void*)&sock);
+	pthread_create(&rcv_thread, NULL, recv_msg, (void*)&sock);
+
+	pthread_join(snd_thread, &thread_return);
+	pthread_join(rcv_thread, &thread_return);
+
+	close(sock);
+
+	return 0;
+}
+
+void* send_msg(void* arg)
+{
+	int sock = *((int*)arg);
+	char name_msg[NAME_SIZE + BUF_SIZE];
+	
+	while(1)
+	{
+		fgets(msg, BUF_SIZE, stdin);
+		if(!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+		{
+			close(sock);
+			exit(0);
+		}
+	
+		sprintf(name_msg, "%s %s", name, msg);
+		write(sock, name_msg, strlen(name_msg));
+	}
+
+	return NULL;
+}
+
+void* recv_msg(void* arg) //read thread_main
+{
+	int sock = *((int*)arg);
+	char name_msg[NAME_SIZE + BUF_SIZE];
+	int str_len;
+
+	while(1)
+	{
+		str_len = read(sock, name_msg, NAME_SIZE + BUF_SIZE - 1);
+		if(str_len == -1)
+			return (void*)-1;
+		
+		name_msg[str_len] = 0;
+		fputs(name_msg, stdout);
+	}
+	
+	return NULL;
+}
+
+void error_handling(char* msg)
+{
+	fputs(msg, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
+```
+
+## 问题探讨
+
+1. 单CPU系统中如何同时执行多个进程？请解释该过程中发生的上下文切换
+
+   > 因为系统将CPU切分成多个微小的块后分配给多个进程，为了`分时使用CPU`,需要”上下文切换“过程。
+   >
+   > ”上下文切换“是指，在CPU改变运行对象的过程中，`执行准备的过程将之前执行的进程数据从换出内存，并将待执行额进程数据传到内存的工作区域`
+
+2. 为何线程的上下文切换速度相对更快？线程间数据交换为何不需要类似IPC的特别技术？
+
+   > 因为线程进行上下文切换时不需要切换数据区和堆区。同时，可以利用数据区和堆区进行数据交换
+
+3. 请从执行流角度说明进程和线程的区别
+
+   - 进程：在操作系统中构成单独执行流的单位
+   - 线程：在进程内构成单独执行流的单位
+
+![image-20210521151702429](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210521151702429.png)
+
+![image-20210521151750013](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210521151750013.png)
+
+6. 请说明完全销毁linux线程的2种方法
+
+   - `pthread_join`函数和`pthread_detach`函数
+
+7. 利用多线程技术实现回声服务器端，并让所有线程共享保存客户端消息的内存空间（char数组）
+
+   ```c
+   //echo_thrserv.c
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include <string.h>
+   #include <unistd.h>
+   #include <arpa/inet.h>
+   #include <sys/socket.h>
+   #include <sys/select.h>
+   #include <pthread.h>
+   
+   #define BUF_SIZE 100
+   void * handle_clnt(void * arg);
+   void error_handling(char *buf);
+   
+   char buf[BUF_SIZE];
+   pthread_mutex_t mutx;
+   
+   int main(int argc, char *argv[])
+   {
+   	int serv_sock, clnt_sock;
+   	struct sockaddr_in serv_adr, clnt_adr;
+   	int clnt_adr_sz;
+   	pthread_t t_id;
+   
+   	if(argc!=2) {
+   		printf("Usage : %s <port>\n", argv[0]);
+   		exit(1);
+   	}
+   
+   	pthread_mutex_init(&mutx, NULL);
+   	serv_sock=socket(PF_INET, SOCK_STREAM, 0);
+   	memset(&serv_adr, 0, sizeof(serv_adr));
+   	serv_adr.sin_family=AF_INET;
+   	serv_adr.sin_addr.s_addr=htonl(INADDR_ANY);
+   	serv_adr.sin_port=htons(atoi(argv[1]));
+   	
+   	if(bind(serv_sock, (struct sockaddr*) &serv_adr, sizeof(serv_adr))==-1)
+   		error_handling("bind() error");
+   	if(listen(serv_sock, 5)==-1)
+   		error_handling("listen() error");
+   
+   	while(1)
+   	{
+   		clnt_adr_sz=sizeof(clnt_adr);
+   		clnt_sock=accept(serv_sock, (struct sockaddr*)&clnt_adr,&clnt_adr_sz);
+   		pthread_create(&t_id, NULL, handle_clnt, (void*)&clnt_sock);
+   		pthread_detach(t_id);
+   		printf("Connected client IP: %s \n", inet_ntoa(clnt_adr.sin_addr));
+   	}
+   
+   	close(serv_sock);
+   	return 0;
+   }
+   
+   void * handle_clnt(void * arg)
+   {
+   	int clnt_sock=*((int*)arg);
+   	int str_len=0;
+   	
+   	while(1)
+   	{
+   		pthread_mutex_lock(&mutx);
+   		str_len=read(clnt_sock, buf, sizeof(buf));
+   		if(str_len<=0)
+   			break;
+   		else
+   			write(clnt_sock, buf, str_len);
+   		pthread_mutex_unlock(&mutx);
+   	}
+   	
+   	close(clnt_sock);
+   	return NULL;
+   }
+   void error_handling(char *buf)
+   {
+   	fputs(buf, stderr);
+   	fputc('\n', stderr);
+   	exit(1);
+   }
+   ```
+
+   > 存在的问题：
+   >
+   > 如果不进行线程同步，两个以上线程会同时访问内存空间，从而引发问题。
+   >
+   > 相反，如果同步，由于read函数中调用了临界区的参数，可能会发生无法读取其他客户端发送过来的字符串而必须等待的情况
+
 # 总结
 
 ## 关于int main中的传入参数
@@ -2123,6 +3603,10 @@ https://www.runoob.com/cprogramming/c-fun-pointer-callback.html
 纳格的文件[[注 1\]](https://zh.wikipedia.org/wiki/納格算法#cite_note-1)描述了他所谓的“小数据包问题”－某个应用程序不断地提交小单位的资料，且某些常只占1[字节](https://zh.wikipedia.org/wiki/位元组)大小。因为[TCP](https://zh.wikipedia.org/wiki/傳輸控制協議)数据包具有40[字节](https://zh.wikipedia.org/wiki/位元组)的标头信息（TCP与IPv4各占20字节），这导致了41字节大小的数据包只有1字节的可用信息，造成庞大的浪费。这种状况常常发生于[Telnet](https://zh.wikipedia.org/wiki/Telnet)工作阶段－大部分的键盘操作会产生1字节的资料并马上提交。更糟的是，在慢速的网络连线下，这类的数据包会大量地在同一时点传输，造成[壅塞碰撞](https://zh.wikipedia.org/w/index.php?title=壅塞碰撞&action=edit&redlink=1)。
 
 纳格算法的工作方式是合并（[coalescing](https://zh.wiktionary.org/wiki/en:Coalesce)）一定数量的输出资料后一次提交。特别的是，只要有已提交的数据包尚未确认，发送者会持续缓冲数据包，直到累积一定数量的资料才提交。
+
+## [epoll的本质](https://zhuanlan.zhihu.com/p/63179839)
+
+
 
 ## 课后参考
 
