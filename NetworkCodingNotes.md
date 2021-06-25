@@ -1,14 +1,12 @@
 [TOC]
 
-
-
 # 第一章：理解网络编程和套接字
 
 ## 理解网络编程和套接字
 
-<img src="C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210424162751261.png" alt="image-20210424162751261" style="zoom:50%;" />
+<img src="NetworkCodingNotes.assets/image-20210424162751261.png" alt="image-20210424162751261" style="zoom:50%;" />
 
-![image-20210424163157067](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210424163157067.png)
+![image-20210424163157067](NetworkCodingNotes.assets/image-20210424163157067.png)
 
 > 服务器端创建的套接字又称为`服务器端套接字或监听套接字`
 >
@@ -17,15 +15,15 @@
 > - 调用socket函数创建套接字
 > - 调用connect函数向服务器端发送链接请求两个步骤
 
-![image-20210424163443193](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210424163443193.png)
+![image-20210424163443193](NetworkCodingNotes.assets/image-20210424163443193.png)
 
 ## linux文件操作
 
-![image-20210426092218282](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426092218282.png)
+![image-20210426092218282](NetworkCodingNotes.assets/image-20210426092218282.png)
 
  
 
-![image-20210425210706620](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210425210706620.png)
+![image-20210425210706620](NetworkCodingNotes.assets/image-20210425210706620.png)
 
 > 1. 套接字是网络数据传输用的软件设备，为了与远程计算机进行数据传输，需要连接到因特网，而编程中的“套接字”就是用来连接该网络的工具。本身就具有连接的意义
 > 2. listen：将套接字转化成可接收连接的状态，accept：接受处理连接请求
@@ -49,7 +47,7 @@ int socket(int domain, int type, int protocol);
 
 ### 协议族
 
-![image-20210426093552220](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426093552220.png)
+![image-20210426093552220](NetworkCodingNotes.assets/image-20210426093552220.png)
 
 ### 套接字类型Type
 
@@ -65,7 +63,7 @@ int socket(int domain, int type, int protocol);
     <img src="C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426094348766.png" alt="image-20210426094348766" style="zoom:50%;" />
 </div>
 
-![image-20210426095528698](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426095528698.png)
+![image-20210426095528698](NetworkCodingNotes.assets/image-20210426095528698.png)
 
 > 面向连接的套接字特点：
 >
@@ -75,7 +73,7 @@ int socket(int domain, int type, int protocol);
 
 #### 面向消息的套接字(SOCK_DGRAM)`UDP`
 
-![image-20210426100014663](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426100014663.png)
+![image-20210426100014663](NetworkCodingNotes.assets/image-20210426100014663.png)
 
 > **总结：**不可靠的，不按顺序传递的，以数据的高速传输为目的的套接字
 
@@ -87,9 +85,9 @@ int socket(int domain, int type, int protocol);
 >
 > 当"同一协议族中存在多个数据传输方式相同的协议"时，即数据传输方式相同，但`协议不同，此时需要通过第三个参数具体指定协议信息`
 
-![image-20210426100630475](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426100630475.png)
+![image-20210426100630475](NetworkCodingNotes.assets/image-20210426100630475.png)
 
-![image-20210426104817070](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426104817070.png)
+![image-20210426104817070](NetworkCodingNotes.assets/image-20210426104817070.png)
 
 # 第三章：地址族与数据序列
 
@@ -109,11 +107,11 @@ int socket(int domain, int type, int protocol);
 - IPv4，4字节地址族
 - IPv6，16字节地址族
 
-![image-20210426105630978](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426105630978.png)
+![image-20210426105630978](NetworkCodingNotes.assets/image-20210426105630978.png)
 
 ### 网络地址区分方法
 
-![image-20210426105943577](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426105943577.png)
+![image-20210426105943577](NetworkCodingNotes.assets/image-20210426105943577.png)
 
 ### 用于区分套接字的端口号
 
@@ -163,13 +161,13 @@ if(bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
     error_handling("bind() error");
 ```
 
-![image-20210426111805100](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426111805100.png)
+![image-20210426111805100](NetworkCodingNotes.assets/image-20210426111805100.png)
 
 #### 结构体`sockaddr_in`的成员分析
 
-![image-20210426112231732](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426112231732.png)
+![image-20210426112231732](NetworkCodingNotes.assets/image-20210426112231732.png)
 
-![image-20210426112830083](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426112830083.png)
+![image-20210426112830083](NetworkCodingNotes.assets/image-20210426112830083.png)
 
 
 
@@ -183,13 +181,13 @@ if(bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
 - 小端序：高位字节存放到高位地址
 - 目前主流的CPU以小端序方式保存数据
 
-![image-20210426113327909](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426113327909.png)
+![image-20210426113327909](NetworkCodingNotes.assets/image-20210426113327909.png)
 
 **网络字节序：为了解决接受方和发送方可能存在的字节序不同导致的数据传输问题（统一为大端序）**
 
-![image-20210426145457351](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426145457351.png)
+![image-20210426145457351](NetworkCodingNotes.assets/image-20210426145457351.png)
 
-![image-20210426145917309](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426145917309.png)
+![image-20210426145917309](NetworkCodingNotes.assets/image-20210426145917309.png)
 
 ```c
 #include <stdio.h>
@@ -214,7 +212,7 @@ int main(int argc, char *argv[])
 }
 ```
 
-![image-20210426150541937](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426150541937.png)
+![image-20210426150541937](NetworkCodingNotes.assets/image-20210426150541937.png)
 
 ## 网络地址的初始化与分配
 
@@ -254,11 +252,11 @@ int main(int argc, char *argv[])
 //显示结果为
 ```
 
-![image-20210426153212104](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426153212104.png)
+![image-20210426153212104](NetworkCodingNotes.assets/image-20210426153212104.png)
 
-![image-20210426153429818](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426153429818.png)
+![image-20210426153429818](NetworkCodingNotes.assets/image-20210426153429818.png)
 
-![image-20210426153746203](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426153746203.png)
+![image-20210426153746203](NetworkCodingNotes.assets/image-20210426153746203.png)
 
 **总结：三种字符串和网络字节序转换的函数**
 
@@ -275,19 +273,19 @@ char* inet_ntoa(struct in_addr adr); //将网络字节序整数型IP地址转换
 //成功时返回转换的字符串地址值，失败返回-1
 ```
 
-![image-20210426154846175](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426154846175.png)
+![image-20210426154846175](NetworkCodingNotes.assets/image-20210426154846175.png)
 
 ### 网络地址初始化
 
-![image-20210426155206031](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426155206031.png)
+![image-20210426155206031](NetworkCodingNotes.assets/image-20210426155206031.png)
 
-![image-20210426155232848](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426155232848.png)
+![image-20210426155232848](NetworkCodingNotes.assets/image-20210426155232848.png)
 
 ### 客户端地址信息初始化
 
 在`3.3.2`节中的**网络地址信息初始化过程**主要针对服务器端而非客户端，给套接字分配IP地址和端口号主要是为了让服务器进入`listen并accept的状态`
 
-![image-20210426155520306](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426155520306.png)
+![image-20210426155520306](NetworkCodingNotes.assets/image-20210426155520306.png)
 
 ### INADDR_ANY
 
@@ -303,9 +301,9 @@ addr.sin_addr.s_addr = htol(INADDR_ANY); //利用常数INADDR_ANY分配服务器
 addr.sin_port = htons(atoi(serv_port)); //基于字符串的网络端口初始化
 ```
 
-![image-20210426160022800](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426160022800.png)
+![image-20210426160022800](NetworkCodingNotes.assets/image-20210426160022800.png)
 
-![image-20210426160201861](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426160201861.png)
+![image-20210426160201861](NetworkCodingNotes.assets/image-20210426160201861.png)
 
 ### 向套接字分配网络地址
 
@@ -320,7 +318,7 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 //addrlen：第二个结构体变量的长度
 ```
 
-![image-20210426160836523](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426160836523.png)
+![image-20210426160836523](NetworkCodingNotes.assets/image-20210426160836523.png)
 
 ## 问题探讨
 
@@ -366,7 +364,7 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 5. read()/write() 数据交换传输
 6. close()断开链接
 
-![image-20210426164413400](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426164413400.png)
+![image-20210426164413400](NetworkCodingNotes.assets/image-20210426164413400.png)
 
 > **等待连接请求状态：**指客户端请求连接时，受理连接前一直处于等待状态
 >
@@ -374,7 +372,7 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 >
 > 准备好服务器端套接字和连接请求等待队列后，这种可接受连接请求的状态称为`等待连接请求状态`
 
-![image-20210426165122875](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426165122875.png)
+![image-20210426165122875](NetworkCodingNotes.assets/image-20210426165122875.png)
 
 ### TCP客户端的默认函数调用顺序
 
@@ -399,13 +397,13 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 > 1. 服务器端接受连接请求（并不意味着服务器端调用accept函数，可以是进入到等待队列）**因此，connect函数返回后，并不立即进行数据交换**
 > 2. 发生断网等异常情况而中断连接请求
 
-![image-20210426170544668](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426170544668.png)
+![image-20210426170544668](NetworkCodingNotes.assets/image-20210426170544668.png)
 
 ### 基于TCP的服务器端、客户端的函数调用关系
 
-![image-20210426170917636](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426170917636.png)
+![image-20210426170917636](NetworkCodingNotes.assets/image-20210426170917636.png)
 
-![image-20210426171003838](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426171003838.png)
+![image-20210426171003838](NetworkCodingNotes.assets/image-20210426171003838.png)
 
 ## 实现迭代服务器端/客户端
 
@@ -413,15 +411,15 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 
 ### 实现迭代服务器端
 
-![image-20210426171252179](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426171252179.png)
+![image-20210426171252179](NetworkCodingNotes.assets/image-20210426171252179.png)
 
 > 门卫还在，但是换了一批面试官
 
-![image-20210426171352752](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426171352752.png)
+![image-20210426171352752](NetworkCodingNotes.assets/image-20210426171352752.png)
 
 #### 迭代回声服务器端、客户端
 
-![image-20210426171458563](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210426171458563.png)
+![image-20210426171458563](NetworkCodingNotes.assets/image-20210426171458563.png)
 
 > **存在的问题：**
 >
@@ -435,15 +433,15 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 >
 > ****
 
-![image-20210427154222788](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427154222788.png)
+![image-20210427154222788](NetworkCodingNotes.assets/image-20210427154222788.png)
 
-![image-20210427154358211](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427154358211.png)
+![image-20210427154358211](NetworkCodingNotes.assets/image-20210427154358211.png)
 
-![image-20210427154538803](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427154538803.png)
+![image-20210427154538803](NetworkCodingNotes.assets/image-20210427154538803.png)
 
-![image-20210427154614526](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427154614526.png)
+![image-20210427154614526](NetworkCodingNotes.assets/image-20210427154614526.png)
 
-![image-20210427154713366](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427154713366.png)
+![image-20210427154713366](NetworkCodingNotes.assets/image-20210427154713366.png)
 
 
 
@@ -483,9 +481,9 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 >
 > 因此，还需要考虑服务器端的如下情况：字符串太长则分成两个数据包发送
 
-![image-20210427155112968](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427155112968.png)
+![image-20210427155112968](NetworkCodingNotes.assets/image-20210427155112968.png)
 
-![image-20210427155739156](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427155739156.png)
+![image-20210427155739156](NetworkCodingNotes.assets/image-20210427155739156.png)
 
 ## 如果问题不在于回声客户端：定义应用层协议
 
@@ -495,17 +493,17 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 
 ### 计算器服务端、客户端
 
-![image-20210427160510077](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427160510077.png)
+![image-20210427160510077](NetworkCodingNotes.assets/image-20210427160510077.png)
 
 ## TCP原理
 
 ### TCP套接字中的I/O缓冲
 
-![image-20210427164317480](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427164317480.png)
+![image-20210427164317480](NetworkCodingNotes.assets/image-20210427164317480.png)
 
-![image-20210427164452438](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427164452438.png)
+![image-20210427164452438](NetworkCodingNotes.assets/image-20210427164452438.png)
 
-![image-20210427164616412](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427164616412.png)
+![image-20210427164616412](NetworkCodingNotes.assets/image-20210427164616412.png)
 
 ## 问题探讨
 
@@ -523,7 +521,7 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 
    > 通过流量控制
 
-![image-20210428150456525](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210428150456525.png)
+![image-20210428150456525](NetworkCodingNotes.assets/image-20210428150456525.png)
 
 # 第六章：基于UDP的服务端、客户端
 
@@ -533,7 +531,7 @@ int bind(int sockfd, struct sockaddr * myaddr, sockelent_t addrlen);
 
 ## UDP协议的有效性
 
-![image-20210428151155332](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210428151155332.png)
+![image-20210428151155332](NetworkCodingNotes.assets/image-20210428151155332.png)
 
 ## 实现基于UDP的服务器端、客户端
 
@@ -576,7 +574,7 @@ ssize_t recvfrom(int sock, void *buff, size_t nbytes, int flags, struct sockaddr
 
 在TCP客户端实现的时候，有一个通过connect同server相连接的过程。而在UDP客户端中则没有这一步骤。
 
-![image-20210428173913259](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210428173913259.png)
+![image-20210428173913259](NetworkCodingNotes.assets/image-20210428173913259.png)
 
 ## UDP的数据传输特性和调用connect函数
 
@@ -586,13 +584,13 @@ ssize_t recvfrom(int sock, void *buff, size_t nbytes, int flags, struct sockaddr
 >
 > 例如：调用三次输出函数发送的数据必须通过调用三次输入函数才能接收完
 
-![image-20210428174535572](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210428174535572.png)
+![image-20210428174535572](NetworkCodingNotes.assets/image-20210428174535572.png)
 
 
 
 ### 已连接UDP套接字与未连接UDP套接字
 
-![image-20210429100854001](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210429100854001.png)
+![image-20210429100854001](NetworkCodingNotes.assets/image-20210429100854001.png)
 
 ### 创建已连接UDP套接字
 
@@ -604,7 +602,7 @@ ssize_t recvfrom(int sock, void *buff, size_t nbytes, int flags, struct sockaddr
 >
 > **对于已连接UDP套接字，不仅可以通过`sendto(), recvfrom()`还可以使用TCP套接字的`write和read`进行通信**
 
-![image-20210429101607643](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210429101607643.png)
+![image-20210429101607643](NetworkCodingNotes.assets/image-20210429101607643.png)
 
 ## 问题探讨
 
@@ -614,7 +612,7 @@ ssize_t recvfrom(int sock, void *buff, size_t nbytes, int flags, struct sockaddr
    >
    > 这也是TCP比UDP数据传输可靠的依据。面向连接，重传，流量控制等
 
-2. ![image-20210429102156721](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210429102156721.png)
+2. ![image-20210429102156721](NetworkCodingNotes.assets/image-20210429102156721.png)
 
 3. 何种情况下，UDP的性能优于TCP
 
@@ -694,11 +692,11 @@ struct hostent{
 };
 ```
 
-![image-20210506110301033](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506110301033.png)![image-20210506110334155](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506110334155.png)
+![image-20210506110301033](NetworkCodingNotes.assets/image-20210506110301033.png)![image-20210506110334155](NetworkCodingNotes.assets/image-20210506110334155.png)
 
 > 结构体成员中`h_addr_list`指向字符串指针数组（是由多个字符地址构成的数组），但字符串指针数组中的元素实际指向的是`in_addr(IPv4地址)`结构体变量地址值而非字符串。
 >
-> ![image-20210506142132191](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506142132191.png)
+> ![image-20210506142132191](NetworkCodingNotes.assets/image-20210506142132191.png)
 >
 > **Q1:为什么是char*而不是in_addr\*:** 因为hostent结构体并非只为IPv4准备，h_addr_list指向的数组中也可以保存IPv6地址信息
 >
@@ -711,7 +709,7 @@ struct hostent{
 >     printf("IP addr %d : %s \n", i+1, inet_ntoa(*(struct in_addr*)host->h_addr_list[i]));
 > ```
 
-![image-20210506141407737](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506141407737.png)
+![image-20210506141407737](NetworkCodingNotes.assets/image-20210506141407737.png)
 
 ## 利用IP地址获取域名`gethostbyaddr`
 
@@ -729,7 +727,7 @@ struct hostent* gethostbyaddr*(const char* addr, socklen_t len, int family);
 
 # 套接字的多种可选项
 
-![image-20210508162426901](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508162426901.png)
+![image-20210508162426901](NetworkCodingNotes.assets/image-20210508162426901.png)
 
  
 
@@ -759,29 +757,29 @@ optlen 向第四个参数optval传递的可选项信息的字节数 len = sizeof
 
 **代码示例：**
 
-![image-20210506152922520](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506152922520.png)
+![image-20210506152922520](NetworkCodingNotes.assets/image-20210506152922520.png)
 
 > 套接字类型的`SO_TYPE`是典型的只读可选项，即套接字类型只能在创建时设定，而不能通过`setsockopt`进行相关更改
 
 ## SO_SNDBUF & SO_RCVBUF
 
-![image-20210427164452438](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427164452438.png)
+![image-20210427164452438](NetworkCodingNotes.assets/image-20210427164452438-1624613646180.png)
 
 > SO_RCVBUF是输入缓冲大小相关可选项，SO_SNDBUF是输出缓冲大小相关可选项。可以通过这两个选项`读取或设定`当前I/O缓冲大小
 
 **get_buf.c代码测试：**
 
-![image-20210506154046225](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506154046225.png)
+![image-20210506154046225](NetworkCodingNotes.assets/image-20210506154046225.png)
 
-![image-20210506154127307](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506154127307.png)
+![image-20210506154127307](NetworkCodingNotes.assets/image-20210506154127307.png)
 
 **setbuf.c代码测试**
 
-![](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506154435129.png)
+![](NetworkCodingNotes.assets/image-20210506154435129.png)
 
-![image-20210506154520464](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506154520464.png)
+![image-20210506154520464](NetworkCodingNotes.assets/image-20210506154520464.png)
 
-![image-20210506154628076](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210506154628076.png)
+![image-20210506154628076](NetworkCodingNotes.assets/image-20210506154628076.png)
 
 ## SO_REUSEADDR
 
@@ -790,7 +788,7 @@ optlen 向第四个参数optval传递的可选项信息的字节数 len = sizeof
 1. 当服务器端向客户端发送FIN消息的时候，那么服务器端在重新运行时将产生问题，如果用同一端口还哦重新运行服务器端，会输出`bind() error`消息，并且无法再次运行。但是经过几分钟后，即可重新运行服务器端
 2. 通过客户端通知服务器端断开TCP连接，那么可以及时地关闭文件及套接字。重新运行服务器端也不会出现上述问题。
 
-![image-20210508164015709](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508164015709.png)
+![image-20210508164015709](NetworkCodingNotes.assets/image-20210508164015709.png)
 
 ### 解决方案：地址再分配机制
 
@@ -816,7 +814,7 @@ setsockpot(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void*)&option, optlen); //参�
 
 因此，为了提高网络传输效率，必须使用Nagle算法
 
-![image-20210508170103405](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508170103405.png)
+![image-20210508170103405](NetworkCodingNotes.assets/image-20210508170103405.png)
 
 > 根据数据传输的特性，当网络流量未受太大影响时，不使用Nagle算法要比使用时传输速度快。
 >
@@ -826,7 +824,7 @@ setsockpot(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void*)&option, optlen); //参�
 
 ### 禁用Nagle算法
 
-![image-20210508170819442](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508170819442.png)
+![image-20210508170819442](NetworkCodingNotes.assets/image-20210508170819442.png)
 
 # 多进程服务器
 
@@ -871,7 +869,7 @@ setsockpot(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void*)&option, optlen); //参�
    > - 父进程（原进程，fork函数的主体）：fork函数返回子进程ID
    > - 子进程：fork函数返回0
    >
-   > ![image-20210508195041304](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508195041304.png)
+   > ![image-20210508195041304](NetworkCodingNotes.assets/image-20210508195041304.png)
    >
    > 
 
@@ -883,7 +881,7 @@ setsockpot(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void*)&option, optlen); //参�
 
 > 向exit函数传递的参数值和main函数的return语句返回的值都会传递给操作系统。而操作系统不会销毁子进程，直到把这些值传递给产生该子进程的父进程。处在这种状态下的进程就是僵尸进程。`将子进程变成僵尸进程的是操作系统`
 
-![image-20210508220209597](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508220209597.png)
+![image-20210508220209597](NetworkCodingNotes.assets/image-20210508220209597.png)
 
 ### 销毁僵尸进程1：利用wait函数
 
@@ -981,9 +979,9 @@ void (*signal(int signo, void (*func)(int)))(int); //为了在产生信号时调
 
 ### alarm函数
 
-![image-20210508211430540](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508211430540.png)
+![image-20210508211430540](NetworkCodingNotes.assets/image-20210508211430540.png)
 
-![image-20210508212203806](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508212203806.png)
+![image-20210508212203806](NetworkCodingNotes.assets/image-20210508212203806.png)
 
 > **发生信号时，将唤醒由于调用sleep函数而进入阻塞状态的进程。**
 >
@@ -991,13 +989,13 @@ void (*signal(int signo, void (*func)(int)))(int); //为了在产生信号时调
 
 ### 利用sigaction函数进行信号处理
 
-![image-20210508212652467](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508212652467.png)
+![image-20210508212652467](NetworkCodingNotes.assets/image-20210508212652467.png)
 
 **sigaction代码示例**
 
-![image-20210508212911870](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508212911870.png)
+![image-20210508212911870](NetworkCodingNotes.assets/image-20210508212911870.png)
 
-![image-20210508212932497](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210508212932497.png)
+![image-20210508212932497](NetworkCodingNotes.assets/image-20210508212932497.png)
 
 ### 利用信号处理技术消灭僵尸进程
 
@@ -1094,19 +1092,19 @@ void error_handling(char* message)
 >
 > 因此会导致同一个端口对应多个套接字。而一个只有当这多个文件描述符都终止或销毁的时候，套接字才能够被销毁。进而端口关闭。因此， 调用fork函数后，要将无关的套接字文件描述符都关闭。
 >
-> ![image-20210509111508660](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210509111508660.png)
+> ![image-20210509111508660](NetworkCodingNotes.assets/image-20210509111508660.png)
 
 ### 分割TCP的I/O程序
 
 **优点：**通过创建多个进程，分割数据收发流程。另一个好处：可以提高频繁交换数据的程序性能
 
-<img src="C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210509111933649.png" alt="image-20210509111933649" style="zoom:50%;" />
+<img src="NetworkCodingNotes.assets/image-20210509111933649.png" alt="image-20210509111933649" style="zoom:50%;" />
 
 ## 问题探讨
 
-![img](https://kongjhong-image.oss-cn-beijing.aliyuncs.com/img/20190401142353.png)
+![img](NetworkCodingNotes.assets/20190401142353.png)
 
-![image-20210509112743730](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210509112743730.png)
+![image-20210509112743730](NetworkCodingNotes.assets/image-20210509112743730.png)
 
 **请说明进程变为僵尸进程的过程及预防措施：**
 
@@ -1117,7 +1115,7 @@ void error_handling(char* message)
 > - wait和waitpid
 > - sigaction函数
 
-![image-20210510102048045](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210510102048045.png)
+![image-20210510102048045](NetworkCodingNotes.assets/image-20210510102048045.png)
 
 ```c++
 #include <stdio.h>
@@ -1200,7 +1198,7 @@ int main(int argc, char* argv[])
 
 ### 通过管道进行进程间双向通信
 
-![image-20210510160859779](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210510160859779.png)
+![image-20210510160859779](NetworkCodingNotes.assets/image-20210510160859779.png)
 
 ```c++
 #include <stdio.h>
@@ -1311,11 +1309,11 @@ int main(int argc, char* argv[])
 1. 时分复用技术
 2. 频分复用技术
 
-![image-20210511154619191](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511154619191.png)
+![image-20210511154619191](NetworkCodingNotes.assets/image-20210511154619191.png)
 
 ## 理解select函数并实现服务器端
 
-![image-20210511160126850](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511160126850.png)
+![image-20210511160126850](NetworkCodingNotes.assets/image-20210511160126850.png)
 
 **select函数调用过程：**
 
@@ -1333,7 +1331,7 @@ int main(int argc, char* argv[])
 
 ![image-20210511160919196](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511160919196.png)
 
-![image-20210511161042682](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511161042682.png)
+![image-20210511161042682](NetworkCodingNotes.assets/image-20210511161042682.png)
 
 ### 设置监视范围及超时
 
@@ -1366,7 +1364,7 @@ struct timeval
 
 > 是指监视的文件描述符中发生了相应的监视事件，例如通过`select`的第二个参数传递的集合中存在需要读数据的描述符时，就意味着文件描述符发生了变化
 >
-> ![image-20210511162731101](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511162731101.png)
+> ![image-20210511162731101](NetworkCodingNotes.assets/image-20210511162731101.png)
 
 //select函数代码示例
 
@@ -1516,7 +1514,7 @@ void error_handling(char *buf)
 }
 ```
 
-![image-20210511190622726](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210511190622726.png)
+![image-20210511190622726](NetworkCodingNotes.assets/image-20210511190622726.png)
 
 
 
@@ -1566,7 +1564,7 @@ str_len = recv(recv_sock, buf, sizeof(buf) - 1, 0); //因为C风格字符串末�
 buf[str_len] = 0; //又添上末尾的0
 ```
 
-![image-20210512101709472](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512101709472.png)
+![image-20210512101709472](NetworkCodingNotes.assets/image-20210512101709472.png)
 
 ### MSG_OOB：发送紧急消息
 
@@ -1594,11 +1592,11 @@ act.sa_flags = 0;
 state = sigaction(SIGURG, &act, 0); //检测是否有MSG_OOB
 ```
 
-![image-20210512104941781](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512104941781.png)
+![image-20210512104941781](NetworkCodingNotes.assets/image-20210512104941781.png)
 
 > 处理SIGURG信号时必须指定处理信号的进程，通过getpid函数返回调用次函数的进程ID
 
-![image-20210512105516009](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512105516009.png)
+![image-20210512105516009](NetworkCodingNotes.assets/image-20210512105516009.png)
 
 ### TCP紧急模式
 
@@ -1606,7 +1604,7 @@ state = sigaction(SIGURG, &act, 0); //检测是否有MSG_OOB
 
 指定`MSG_OOB`选项的数据包本身就是紧急数据包，并通过紧急指针表示紧急消息所在位置
 
-![image-20210512110849474](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512110849474.png)
+![image-20210512110849474](NetworkCodingNotes.assets/image-20210512110849474.png)
 
 ### 检查输入缓冲
 
@@ -1616,7 +1614,7 @@ state = sigaction(SIGURG, &act, 0); //检测是否有MSG_OOB
 
 **PEEK收发验证代码示例：**
 
-![image-20210512111712667](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512111712667.png)
+![image-20210512111712667](NetworkCodingNotes.assets/image-20210512111712667.png)
 
 ## readv和writev函数
 
@@ -1644,11 +1642,11 @@ ssize_t readv(int filedes, const struct iovec* iov, int iovcnt); //成功时返�
 > - 1：向控制台输出数据
 > - 0：获取控制台输入数据
 
-![image-20210512143231414](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512143231414.png)
+![image-20210512143231414](NetworkCodingNotes.assets/image-20210512143231414.png)
 
 ## 问题探讨
 
-![image-20210512151733677](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512151733677.png)
+![image-20210512151733677](NetworkCodingNotes.assets/image-20210512151733677.png)
 
 2. 利用readv和writev函数收发数据有何优点？分别从函数调用次数和I/O缓冲的角度给出说明
 
@@ -1658,7 +1656,7 @@ ssize_t readv(int filedes, const struct iovec* iov, int iovcnt); //成功时返�
 
 3. 通过recv函数验证输入缓冲是否存在数据时（确认后立即返回），如何设置recv函数最后一个参数中的可选项？并说明其他可选项的意义
 
-   > ![image-20210512101709472](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512101709472.png)
+   > ![image-20210512101709472](NetworkCodingNotes.assets/image-20210512101709472-1624613783011.png)
    >
    > **通常将MSG_PEEK和MSG_DONTWAIT一起使用，用来检测缓冲中的是否存在数据**
 
@@ -1674,7 +1672,7 @@ ssize_t readv(int filedes, const struct iovec* iov, int iovcnt); //成功时返�
 - 加入特定组即可接收发往该多播组的数据
 - **多播组是D类IP地址**
 
-![image-20210512162025396](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512162025396.png)
+![image-20210512162025396](NetworkCodingNotes.assets/image-20210512162025396.png)
 
 > **多播的作用：**多播并没有减少网络上的数据包个数。但是能够减少发送次数。其他的文件由路由器负责复制并传递到对应的主机。
 >
@@ -1865,9 +1863,9 @@ void error_handling(char* message)
 1. 直接广播
 2. 本地广播
 
-![image-20210513145147251](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210513145147251.png)
+![image-20210513145147251](NetworkCodingNotes.assets/image-20210513145147251.png)
 
-![image-20210513145307766](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210513145307766.png)
+![image-20210513145307766](NetworkCodingNotes.assets/image-20210513145307766.png)
 
 ```c
 //sender.c
@@ -1992,7 +1990,7 @@ void error_handling(char* message)
 
    > 这里的直接广播地址是通过ifconfig得到的
    >
-   > ![image-20210513151508324](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210513151508324.png)
+   > ![image-20210513151508324](NetworkCodingNotes.assets/image-20210513151508324.png)
 
 ## 问题探讨
 
@@ -2020,9 +2018,9 @@ void error_handling(char* message)
 
 2. 标准I/O函数可以利用缓冲提高性能
 
-   ![](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514143436490.png)
+   ![](NetworkCodingNotes.assets/image-20210514143436490.png)
 
-   ![image-20210514143523025](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514143523025.png)
+   ![image-20210514143523025](NetworkCodingNotes.assets/image-20210514143523025.png)
 
    **设置缓冲的用途：**
 
@@ -2041,11 +2039,11 @@ void error_handling(char* message)
 
    2. 套接字的缓冲主要是为了TCP协议而设立的，为的是能够实现再次重传。因此，在套接字的输出缓冲中保存了已经发送的数据
 
-   ![image-20210514144239146](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514144239146.png)
+   ![image-20210514144239146](NetworkCodingNotes.assets/image-20210514144239146.png)
 
 ### 标准I/O函数的几个缺点
 
-![image-20210514150222169](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514150222169.png)
+![image-20210514150222169](NetworkCodingNotes.assets/image-20210514150222169.png)
 
 ### 使用标准I/O函数
 
@@ -2090,7 +2088,7 @@ int main(void)
 int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败时返回-1
 ```
 
-![image-20210514152054691](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514152054691.png)
+![image-20210514152054691](NetworkCodingNotes.assets/image-20210514152054691.png)
 
 ## 基于套接字的标准I/O函数使用
 
@@ -2098,15 +2096,15 @@ int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败�
 
 **1. echo_server.c的两种实现方式**
 
-![image-20210514154355009](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154355009.png)
+![image-20210514154355009](NetworkCodingNotes.assets/image-20210514154355009.png)
 
-![image-20210514154529742](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154529742.png)
+![image-20210514154529742](NetworkCodingNotes.assets/image-20210514154529742.png)
 
 > 标准I/O函数为了提高性能，内部提供额外的缓冲。因此，若不调用`fflush`函数则无法保证立即将数据传输到客户端
 
 **2. echo_client.c的两种实现方式**
 
-![image-20210514154826316](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210514154826316.png)
+![image-20210514154826316](NetworkCodingNotes.assets/image-20210514154826316.png)
 
 ## 问题探讨
 
@@ -2129,7 +2127,7 @@ int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败�
 
 1. 通过创建多个进程，分割数据收发流程。另一个好处：可以提高频繁交换数据的程序性能
 
-   <img src="C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210509111933649.png" alt="image-20210509111933649" style="zoom:50%;" />
+   <img src="NetworkCodingNotes.assets/image-20210509111933649-1624613817531.png" alt="image-20210509111933649" style="zoom:50%;" />
 
    **目的：**
 
@@ -2148,9 +2146,9 @@ int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败�
 >
 > 但是对于`FILE指针`的输出模式
 
-![image-20210515143613504](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515143613504.png)
+![image-20210515143613504](NetworkCodingNotes.assets/image-20210515143613504.png)
 
-![image-20210515143802506](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515143802506.png)
+![image-20210515143802506](NetworkCodingNotes.assets/image-20210515143802506.png)
 
 > 在上述代码中，当服务器端关闭输出缓冲writefp的时候，这时候，`套接字创建的tcp连接已经关闭。而不是半关闭`
 >
@@ -2158,9 +2156,9 @@ int fileno(FILE* stream); //成功时返回转换后的文件描述符，失败�
 
 ## 文件描述符的复制和半关闭
 
-![image-20210515144139289](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515144139289.png)
+![image-20210515144139289](NetworkCodingNotes.assets/image-20210515144139289.png)
 
-![image-20210515144329891](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515144329891.png)
+![image-20210515144329891](NetworkCodingNotes.assets/image-20210515144329891.png)
 
 ### 复制文件描述符
 
@@ -2204,7 +2202,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-![image-20210515155515624](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515155515624.png)
+![image-20210515155515624](NetworkCodingNotes.assets/image-20210515155515624.png)
 
 ### 复制文件描述符后”流“的分离
 
@@ -2216,7 +2214,7 @@ int main(int argc, char* argv[])
 
 **sep_serv2.c代码示例：**
 
-![image-20210515160307992](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515160307992.png)
+![image-20210515160307992](NetworkCodingNotes.assets/image-20210515160307992.png)
 
 ## 问题探讨
 
@@ -2252,15 +2250,15 @@ int main(int argc, char* argv[])
 - 调用select函数后常见的针对所有文件描述符的循环语句
 - 每次调用select函数时都需要向该函数传递监视对象信息
 
-![image-20210515165318880](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165318880.png)
+![image-20210515165318880](NetworkCodingNotes.assets/image-20210515165318880.png)
 
-![image-20210515165322722](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165322722.png)
+![image-20210515165322722](NetworkCodingNotes.assets/image-20210515165322722.png)
 
 > 只看代码的话，循环体是对提高性能的大障碍，而**更大的障碍是每次传递监视对象的信息**
 >
 > 应用程序向操作系统传递数据时，将对程序造成很大的负担。而且无法通过代码优化解决。因此将造成性能上的致命弱点
 >
-> ![image-20210515165636867](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165636867.png)
+> ![image-20210515165636867](NetworkCodingNotes.assets/image-20210515165636867.png)
 
 ### select函数的优点
 
@@ -2327,7 +2325,7 @@ int epoll_create(int size); //成功时返回epoll文件描述符，失败时返
 
 **通过epoll_create函数创建的`文件描述符保存空间`称为"epoll例程"**
 
-![image-20210515172000483](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515172000483.png)
+![image-20210515172000483](NetworkCodingNotes.assets/image-20210515172000483.png)
 
 ### epoll_ctl
 
@@ -2352,7 +2350,7 @@ epoll_ctl(A, EPOLL_CTL_ADD, B, C); //向epoll例程A中注册文件描述符B，
 epoll_ctl(A, EPOLL_CTL_DEL, B, NULL); //从epoll例程A中删除文件描述符B
 ```
 
-![image-20210516131909171](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210516131909171.png)
+![image-20210516131909171](NetworkCodingNotes.assets/image-20210516131909171.png)
 
 ```c
 //epoll_event
@@ -2527,7 +2525,7 @@ void error_handling(char* message)
 
 ## 实现边缘触发的回声服务器端
 
-![image-20210517105058578](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210517105058578.png)
+![image-20210517105058578](NetworkCodingNotes.assets/image-20210517105058578.png)
 
 
 
@@ -2702,7 +2700,7 @@ void error_handling(char* message)
 
 3. 无论是select方式还是epoll方式，都需要将监视对象文件描述符信息通过函数调用传递给操作系统。请解释传递该信息的原因
 
-   ![image-20210515165636867](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210515165636867.png)
+   ![image-20210515165636867](NetworkCodingNotes.assets/image-20210515165636867-1624613861580.png)
 
    > 即select函数与文件描述符有关，是监视套接字变化的函数。而`套接字是由操作系统管理的`。所以select函数绝对需要借助于操作系统才能完成功能
 
@@ -2737,15 +2735,15 @@ void error_handling(char* message)
   >
   > 但此时进程A的数据将被移动到硬盘，所以`上下文切换需要很长时间`
 
-![image-20210518094051329](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094051329.png)
+![image-20210518094051329](NetworkCodingNotes.assets/image-20210518094051329.png)
 
 ## 线程和进程的差异
 
-![image-20210518094426676](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094426676.png)
+![image-20210518094426676](NetworkCodingNotes.assets/image-20210518094426676.png)
 
-![image-20210518094637012](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094637012.png)
+![image-20210518094637012](NetworkCodingNotes.assets/image-20210518094637012.png)
 
-![image-20210518094753488](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518094753488.png)
+![image-20210518094753488](NetworkCodingNotes.assets/image-20210518094753488.png)
 
 ## 线程创建及运行
 
@@ -2807,11 +2805,11 @@ void* thread_main(void* arg) //传入参数为pthread_create函数的第四个�
 }
 ```
 
-![image-20210518101005612](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101005612.png)
+![image-20210518101005612](NetworkCodingNotes.assets/image-20210518101005612.png)
 
-![image-20210518101451105](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101451105.png)
+![image-20210518101451105](NetworkCodingNotes.assets/image-20210518101451105.png)
 
-![image-20210518101558166](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518101558166.png)
+![image-20210518101558166](NetworkCodingNotes.assets/image-20210518101558166.png)
 
 ### 通过`pthread_join`函数控制线程的执行流
 
@@ -2890,7 +2888,7 @@ if(pthread_join(t_id, &thr_ret) != 0); //第二个参数为void**
 */
 ```
 
-![image-20210518104312060](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518104312060.png)
+![image-20210518104312060](NetworkCodingNotes.assets/image-20210518104312060.png)
 
 ### 可在临界区内调用的函数
 
@@ -2904,11 +2902,11 @@ if(pthread_join(t_id, &thr_ret) != 0); //第二个参数为void**
 
 2. 非~
 
-![image-20210518105750153](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518105750153.png)
+![image-20210518105750153](NetworkCodingNotes.assets/image-20210518105750153.png)
 
 ### 工作线程模型
 
-![image-20210518143635351](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518143635351.png)
+![image-20210518143635351](NetworkCodingNotes.assets/image-20210518143635351.png)
 
 **thread3.c代码示例**
 
@@ -2956,9 +2954,9 @@ void* thread_summation(void* arg)
 
 
 
-![image-20210518145001987](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518145001987.png)
+![image-20210518145001987](NetworkCodingNotes.assets/image-20210518145001987.png)
 
-![image-20210518145050607](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518145050607.png)
+![image-20210518145050607](NetworkCodingNotes.assets/image-20210518145050607.png)
 
 ## 线程存在的问题和临界区
 
@@ -2966,7 +2964,7 @@ void* thread_summation(void* arg)
 
 **多线程编程中`同步`的重要性**
 
-![image-20210518151004518](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518151004518.png)
+![image-20210518151004518](NetworkCodingNotes.assets/image-20210518151004518.png)
 
 ### 临界区位置
 
@@ -2996,7 +2994,7 @@ void* thread_dec(void* arg)
 }
 ```
 
-![image-20210518151450205](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518151450205.png)
+![image-20210518151450205](NetworkCodingNotes.assets/image-20210518151450205.png)
 
 ## 线程同步
 
@@ -3037,7 +3035,7 @@ int pthread_mutex_lock(pthread_mutex_t* mutex);
 int pthread_mutex_unlock(pthread_mutex_t* mutex); //成功时返回0，失败时返回其他值
 ```
 
-![image-20210518154538315](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518154538315.png)
+![image-20210518154538315](NetworkCodingNotes.assets/image-20210518154538315.png)
 
 ### 信号量
 
@@ -3060,9 +3058,9 @@ int sem_wait(sem_t* sem); //成功时返回0，失败时返回其他值
 //sem：传递保存信号量读取值的变量地址值，传递给sem_post时信号量*sem加1，传递给sem_wait时信号量减1
 ```
 
-![image-20210518163853244](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518163853244.png) 
+![image-20210518163853244](NetworkCodingNotes.assets/image-20210518163853244.png) 
 
-![image-20210518164035944](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518164035944.png)
+![image-20210518164035944](NetworkCodingNotes.assets/image-20210518164035944.png)
 
 **代码实现：**
 
@@ -3125,7 +3123,7 @@ void* accu(void* arg)
 
 **利用两个信号量sem_one和sem_two，并通过调用sem_wait和sem_post函数，实现0,1的翻转**
 
-![image-20210518165735418](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210518165735418.png)
+![image-20210518165735418](NetworkCodingNotes.assets/image-20210518165735418.png)
 
 ## 线程的销毁和多线程并发服务器端的实现
 
@@ -3267,9 +3265,9 @@ void error_handling(char* message)
 }
 ```
 
-![image-20210519112512147](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210519112512147.png)
+![image-20210519112512147](NetworkCodingNotes.assets/image-20210519112512147.png)
 
-![image-20210519112646642](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210519112646642.png)
+![image-20210519112646642](NetworkCodingNotes.assets/image-20210519112646642.png)
 
 ### 多线程并发客户端实现
 
@@ -3290,7 +3288,7 @@ void* send_msg(void* arg);
 void* recv_msg(void* arg); //定义收发信息的函数，交由线程处理
 void error_handling(char* message);
 
-char name[NAME_SIZE] = "[DEFAULT";
+char name[NAME_SIZE] = "[DEFAULT]";
 char msg[BUF_SIZE];
 
 int main(int argc, char* argv[])
@@ -3393,9 +3391,9 @@ void error_handling(char* msg)
    - 进程：在操作系统中构成单独执行流的单位
    - 线程：在进程内构成单独执行流的单位
 
-![image-20210521151702429](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210521151702429.png)
+![image-20210521151702429](NetworkCodingNotes.assets/image-20210521151702429.png)
 
-![image-20210521151750013](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210521151750013.png)
+![image-20210521151750013](NetworkCodingNotes.assets/image-20210521151750013.png)
 
 6. 请说明完全销毁linux线程的2种方法
 
@@ -3505,7 +3503,7 @@ int main( int argc, char** argv )
 ```
 
 **一、argc、argv的具体含义** 
-![image-20210427161037210](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427161037210.png)
+![image-20210427161037210](NetworkCodingNotes.assets/image-20210427161037210.png)
 
 ```c++
 #include <stdio.h>
@@ -3521,7 +3519,7 @@ int main(int argc, char ** argv)
 }
 ```
 
-![image-20210427161521599](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427161521599.png)
+![image-20210427161521599](NetworkCodingNotes.assets/image-20210427161521599.png)
 
 > 因为命令行中argument有五个，因此argc = 5
 
@@ -3565,13 +3563,13 @@ fclose(fp);
 
 > 从C语言的角度来看，减少函数调用次数能够相应提高性能。其更大的意义在于能够减少数据包的个数。假设为了提高效率而在服务器端明确阻止了Nagle算法。那么writev函数在不采用Nagle算法时更有价值
 >
-> ![image-20210512150056078](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210512150056078.png)
+> ![image-20210512150056078](NetworkCodingNotes.assets/image-20210512150056078.png)
 
 
 
 ## TCP三次握手
 
-![image-20210427165153364](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427165153364.png)
+![image-20210427165153364](NetworkCodingNotes.assets/image-20210427165153364.png)
 
 ### ACK增量
 
@@ -3583,7 +3581,7 @@ fclose(fp);
 
 ## TCP四次挥手：断开套接字的连接
 
-![image-20210427165912649](C:\Users\唐昆\AppData\Roaming\Typora\typora-user-images\image-20210427165912649.png)
+![image-20210427165912649](NetworkCodingNotes.assets/image-20210427165912649.png)
 
 ## 函数指针
 
